@@ -1,0 +1,28 @@
+apiVersion: policy.linkerd.io/v1beta2
+kind: HTTPRoute
+metadata:
+  name: {{.ServiceName}}
+  namespace: {{.ServiceName}}-uat
+spec:
+  parentRefs:
+    - name: {{.ReleaseName}}-{{.ServiceName}}
+      namespace: {{.ServiceName}}-uat
+      kind: Service
+      group: core
+      port: {{.Port}}
+  rules:
+{{- $root := . -}}
+{{range .Rules}}
+    - matches:
+        - headers:
+            - name: "x-request-id"
+              value: "{{.RequestId}}"
+      backendRefs:
+        - name: {{$root.ReleaseName}}-{{$root.ServiceName}}
+          namespace: "{{.Namespace}}"
+          port: {{$root.Port}}
+{{end}}
+    - backendRefs:
+          - name: {{.ReleaseName}}-{{.ServiceName}}
+            namespace: {{.ServiceName}}-uat
+            port: {{.Port}}
