@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"fmt"
@@ -6,13 +6,14 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-func getServiceNameFromChart(chart string) string {
+func GetServiceNameFromChart(chart string) string {
 	split := strings.Split(chart, "/")
 	var result string
 	if len(split) > 1 && split[1] != "" {
@@ -23,7 +24,7 @@ func getServiceNameFromChart(chart string) string {
 	return result
 }
 
-func executeCommand(command string) (string, error) {
+func ExecuteCommand(command string) (string, error) {
 	cmd := exec.Command("/bin/sh", "-c", command)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -34,7 +35,7 @@ func executeCommand(command string) (string, error) {
 	return string(output), nil
 }
 
-func getKubeClient() (*kubernetes.Clientset, error) {
+func GetKubeClient() (*kubernetes.Clientset, error) {
 	kubeconfig := filepath.Join(os.Getenv("HOME"), ".kube", "config")
 	k8sConfig, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
 	if err != nil {
@@ -46,4 +47,14 @@ func getKubeClient() (*kubernetes.Clientset, error) {
 		log.Fatalf("Failed to create client: %s", err)
 	}
 	return k8sClient, err
+}
+
+func GetJiraNumberFromNamespace(namespace string) string {
+	re := regexp.MustCompile(`-jira-(\d+)$`)
+	match := re.FindStringSubmatch(namespace)
+	if len(match) < 2 {
+		fmt.Println("Invalid namespace format")
+		return ""
+	}
+	return "jira-" + match[1]
 }

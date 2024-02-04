@@ -1,23 +1,19 @@
-package main
+package routers
 
 import (
 	"bytes"
 	"text/template"
-)
 
-type BackendRef struct {
-	Name      string
-	Namespace string
-	Port      int
-}
+	"github.com/RobDoan/deploy-service/pkg/utils"
+)
 
 type Rule struct {
 	RequestId string
 	Namespace string
 }
 
-func createRule(namespace string) Rule {
-	requestId := getJiraNumberFromNamespace(namespace)
+func CreateRule(namespace string) Rule {
+	requestId := utils.GetJiraNumberFromNamespace(namespace)
 	return Rule{
 		RequestId: requestId,
 		Namespace: namespace,
@@ -41,7 +37,7 @@ func NewRouterBuilder(path string, serviceName string, releaseName string, servi
 }
 
 // createHttpRouter creates a router)
-func (b *RouterBuilder) createHttpRouter(rules []Rule, servicePort int) (string, error) {
+func (b *RouterBuilder) CreateHttpRouter(rules []Rule, servicePort int) (string, error) {
 	tmpl, err := template.ParseFiles(b.TemplatePath)
 
 	if err != nil {

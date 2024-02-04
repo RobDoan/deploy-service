@@ -1,4 +1,4 @@
-package main
+package namespace
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 )
 
 // createNamespace creates a namespace with the given name and adds an annotation to it to enable Linkerd injection.
-func createNamespace(clientset *kubernetes.Clientset, namespace string) error {
+func CreateNamespace(clientset *kubernetes.Clientset, namespace string) error {
 	fmt.Println("Creating namespace...")
 
 	ns := &v1.Namespace{
@@ -32,7 +32,7 @@ func createNamespace(clientset *kubernetes.Clientset, namespace string) error {
 	return nil
 }
 
-func checkIfNamespaceExists(clientset *kubernetes.Clientset, namespace string) (bool, error) {
+func CheckIfNamespaceExists(clientset *kubernetes.Clientset, namespace string) (bool, error) {
 	fmt.Println("Checking if namespace exists...")
 
 	_, err := clientset.CoreV1().Namespaces().Get(context.Background(), namespace, metav1.GetOptions{})
@@ -44,7 +44,7 @@ func checkIfNamespaceExists(clientset *kubernetes.Clientset, namespace string) (
 	return true, nil
 }
 
-func deleteNamespace(clientset *kubernetes.Clientset, namespace string) error {
+func DeleteNamespace(clientset *kubernetes.Clientset, namespace string) error {
 	fmt.Println("Deleting namespace...")
 
 	err := clientset.CoreV1().Namespaces().Delete(context.Background(), namespace, metav1.DeleteOptions{})

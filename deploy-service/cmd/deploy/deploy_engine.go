@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"regexp"
 	"text/template"
+
+	"github.com/RobDoan/deploy-service/pkg/routers"
+	"github.com/RobDoan/deploy-service/pkg/utils"
 )
 
 // HelmCommandTpl represents helm command template
@@ -40,7 +43,7 @@ func createDeployEngineFromCommandOptions() *DeployEngine {
 	}
 
 	if config.ServiceName == "" {
-		config.ServiceName = getServiceNameFromChart(config.Chart)
+		config.ServiceName = utils.GetServiceNameFromChart(config.Chart)
 	}
 
 	if config.Uat {
@@ -65,7 +68,7 @@ func (de *DeployEngine) createNameSpace() {
 	fmt.Println("Creating namespace...")
 	fmt.Println(createNamespaceCmd)
 
-	executeCommand(createNamespaceCmd)
+	utils.ExecuteCommand(createNamespaceCmd)
 }
 
 func (de *DeployEngine) createService() {
@@ -76,17 +79,7 @@ func (de *DeployEngine) createService() {
 
 	fmt.Println(fmt.Sprintf("Creating helm chart: %s ...", de.Chart))
 	hemlChartCmd := buf.String()
-	executeCommand(hemlChartCmd)
-}
-
-func getJiraNumberFromNamespace(namespace string) string {
-	re := regexp.MustCompile(`-jira-(\d+)$`)
-	match := re.FindStringSubmatch(namespace)
-	if len(match) < 2 {
-		fmt.Println("Invalid namespace format")
-		return ""
-	}
-	return "jira-" + match[1]
+	utils.ExecuteCommand(hemlChartCmd)
 }
 
 func isUATNamespace(namespace string) bool {
@@ -94,13 +87,13 @@ func isUATNamespace(namespace string) bool {
 	return re.MatchString(namespace)
 }
 
-func (de *DeployEngine) buildRouteRules(namespaces []string) []Rule {
-	var rules []Rule
+func (de *DeployEngine) buildRouteRules(namespaces []string) []routers.Rule {
+	var rules []routers.Rule
 	for _, namespace := range namespaces {
 		if isUATNamespace(namespace) {
 			continue
 		}
-		rules = append(rules, createRule(namespace))
+		rules = append(rules, routers.CreateRule(namespace))
 	}
 	return rules
 }

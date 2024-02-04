@@ -5,6 +5,10 @@ import (
 	"fmt"
 	"log"
 	"os/exec"
+
+	"github.com/RobDoan/deploy-service/pkg/namespace"
+	"github.com/RobDoan/deploy-service/pkg/routers"
+	"github.com/RobDoan/deploy-service/pkg/utils"
 )
 
 func main() {
@@ -15,21 +19,21 @@ func main() {
 
 	deployEngine.createService()
 
-	k8sClient, err := getKubeClient()
+	k8sClient, err := utils.GetKubeClient()
 	if err != nil {
 		log.Fatalf("Failed to get client: %s", err)
 	}
 
-	namespaces, err := GetListOfNamespacesWithPrefix(k8sClient, fmt.Sprintf("%s-", deployEngine.ServiceName))
+	namespaces, err := namespace.GetListOfNamespacesWithPrefix(k8sClient, fmt.Sprintf("%s-", deployEngine.ServiceName))
 
 	if err != nil {
 		log.Fatalf("Failed to get list of namespaces: %s", err)
 	}
 	var rules = deployEngine.buildRouteRules(namespaces)
 
-	routerBuilder := NewRouterBuilder(deployEngine.TemplatePath, deployEngine.ServiceName, deployEngine.ReleaseName, deployEngine.Port)
+	routerBuilder := routers.NewRouterBuilder(deployEngine.TemplatePath, deployEngine.ServiceName, deployEngine.ReleaseName, deployEngine.Port)
 
-	httpRouter, err := routerBuilder.createHttpRouter(rules, deployEngine.Port)
+	httpRouter, err := routerBuilder.CreateHttpRouter(rules, deployEngine.Port)
 
 	if err != nil {
 		log.Fatalf("Failed to create http router: %s", err)
